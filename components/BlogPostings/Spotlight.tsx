@@ -48,8 +48,8 @@ const MarqueeItem = ({
 }: MarqueeItemProps) => {
     return (
         <div
-            className={`m-2 flex h-[10rem] w-[30%] cursor-pointer items-center justify-center text-center font-bold lg:w-64 ${
-                isCurrent && "text-xl text-wato-blue lg:text-3xl"
+            className={`m-2 flex h-[6rem] w-[30%] min-w-0 cursor-pointer items-center justify-center overflow-hidden text-center text-xs font-bold sm:h-[10rem] sm:text-base lg:w-64 ${
+                isCurrent && "text-sm text-wato-blue sm:text-xl lg:text-3xl"
             }`}
             onClick={() => onClick(idx, postId)}
             role="button"
@@ -203,33 +203,39 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
 
     return (
         <div
-            className={`flex flex-col bg-wato-blue-gloomy px-5 pb-10 sm:px-16 lg:px-44 xl:h-[80vh] xl:px-60`}
+            className={`flex w-full flex-col overflow-x-hidden bg-wato-blue-gloomy px-4 pb-10 sm:px-16 lg:px-44 xl:h-[80vh] xl:px-60`}
         >
             <Marquee
                 posts={marqueePostings}
                 maskPosts={fastPostings}
                 onItemClick={navigateToPost}
             />
-            <div className="spotlight grid auto-rows-min gap-x-24 gap-y-12 transition-opacity lg:grid-cols-2">
-                <div className="col-start-1 col-end-2 text-6xl font-medium">
+            <div className="spotlight grid w-full min-w-0 auto-rows-min gap-x-24 gap-y-8 transition-opacity sm:gap-y-12 lg:grid-cols-2">
+                {/* Title scales down on phones so it stays inside the section */}
+                <div className="col-start-1 col-end-2 break-words text-3xl font-medium sm:text-5xl lg:text-6xl">
                     {post.title}
                 </div>
-                <div className="col-start-1 col-end-2 text-xl font-light">
+                <div className="col-start-1 col-end-2 break-words text-base font-light sm:text-xl">
                     {post.description}
                 </div>
-                <div className="col-start-1 col-end-2">
-                    <span className="text-xl font-bold">Related</span>
-                    <div className="mt-2 flex flex-wrap">
+                <div className="col-start-1 col-end-2 min-w-0">
+                    <span className="text-lg font-bold sm:text-xl">Related</span>
+                    {/*
+                     * Stack related mini-cards on mobile (flex-col),
+                     * side-by-side on larger screens. min-w-0 + break-words
+                     * keep long titles inside each card.
+                     */}
+                    <div className="mt-2 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
                         {related.map((relatedPost) => (
                             <Link
                                 key={relatedPost.id}
                                 href={`/blogs/${relatedPost.id}`}
-                                className="mr-4 flex h-32 flex-col justify-between rounded-sm bg-wato-blue-water p-4 no-underline lg:w-64"
+                                className="flex min-h-[7rem] w-full min-w-0 flex-col justify-between overflow-hidden rounded-sm bg-wato-blue-water p-4 no-underline sm:mr-4 sm:h-32 sm:w-64 sm:max-w-full"
                             >
-                                <div className="font-bold text-black">
+                                <div className="line-clamp-3 break-words font-bold text-black">
                                     {relatedPost.title}
                                 </div>
-                                <div className="font-light text-wato-blue">
+                                <div className="mt-2 font-light text-wato-blue">
                                     Read more →
                                 </div>
                             </Link>

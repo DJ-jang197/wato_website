@@ -37,9 +37,9 @@ export default function BlogPage({ blogData, relatedPosts }: BlogPageProps) {
             <Detail title="published">{blogData.date}</Detail>
             <Detail title="written by">{blogData.authors.join(", ")}</Detail>
 
-            <article className="prose prose-invert flex w-screen max-w-none justify-center bg-wato-black px-10 py-10">
+            <article className="prose prose-invert flex w-full max-w-none justify-center overflow-x-hidden bg-wato-black px-4 py-8 sm:px-10 sm:py-10">
                 <div
-                    className="w-screen md:w-[45rem] lg:w-[50rem] xl:w-[75rem]"
+                    className="w-full min-w-0 break-words md:w-[45rem] lg:w-[50rem] xl:w-[75rem]"
                     dangerouslySetInnerHTML={{ __html: blogData.contentHtml }}
                 />
             </article>

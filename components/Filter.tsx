@@ -53,10 +53,10 @@ const Filter = ({
     };
 
     return (
-        <div className="flex w-screen flex-col items-center justify-center bg-black py-16">
-            <div className="flex w-full max-w-[100rem] items-center px-8 md:px-16 lg:w-[90vw] lg:px-0">
+        <div className="flex w-full flex-col items-center justify-center overflow-x-hidden bg-black py-10 sm:py-16">
+            <div className="flex w-full max-w-[100rem] flex-col items-stretch gap-3 px-4 sm:flex-row sm:items-center sm:gap-0 sm:px-8 md:px-16 lg:w-[90vw] lg:px-0">
                 <input
-                    className="mr-5 w-full rounded-md border-l-[20px] border-white bg-search bg-left bg-no-repeat py-3 pl-10 text-sm outline-none"
+                    className="w-full min-w-0 rounded-md border-l-[20px] border-white bg-search bg-left bg-no-repeat py-3 pl-10 text-sm outline-none sm:mr-5"
                     type="text"
                     id="filter"
                     value={filters}
@@ -64,11 +64,13 @@ const Filter = ({
                     placeholder={placeholder}
                     style={{ backgroundSize: "25px" }}
                 />
-                <Button
-                    text="Clear"
-                    color="bg-wato-teal text-black"
-                    onClick={handleClear}
-                />
+                <div className="shrink-0 self-end sm:self-auto">
+                    <Button
+                        text="Clear"
+                        color="bg-wato-teal text-black"
+                        onClick={handleClear}
+                    />
+                </div>
             </div>
 
             {/*
@@ -78,8 +80,8 @@ const Filter = ({
              * tokens only (no new gradients).
              */}
             {hasTagUi && (
-                <div className="mt-6 flex w-full max-w-[100rem] flex-wrap gap-2 px-8 md:px-16 lg:w-[90vw] lg:px-0">
-                    <span className="mr-2 self-center text-xs font-bold uppercase text-wato-teal">
+                <div className="mt-6 flex w-full max-w-[100rem] flex-wrap gap-2 px-4 sm:px-8 md:px-16 lg:w-[90vw] lg:px-0">
+                    <span className="mr-2 w-full self-center text-xs font-bold uppercase text-wato-teal sm:w-auto">
                         Filter by tag
                     </span>
                     {availableTags.map((tag) => {
@@ -89,7 +91,7 @@ const Filter = ({
                                 key={tag}
                                 type="button"
                                 onClick={() => onToggleTag!(tag)}
-                                className={`cursor-pointer border-0 bg-transparent p-0 ${
+                                className={`max-w-full cursor-pointer border-0 bg-transparent p-0 ${
                                     isSelected
                                         ? "rounded-lg ring-2 ring-wato-teal"
                                         : "opacity-80 hover:opacity-100"
