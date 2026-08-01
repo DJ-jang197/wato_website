@@ -46,6 +46,12 @@ export interface BlogPostData {
     tags: string[];
     image: string;
     contentHtml: string | any;
+    /**
+     * Optional frontmatter flag (Workstream C).
+     * true → post appears in the Spotlight carousel on /blogs.
+     * Safe to omit; treat missing as false.
+     */
+    spotlight?: boolean;
 }
 
 export interface StaticProps {

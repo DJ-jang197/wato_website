@@ -1,0 +1,41 @@
+# Blog posts (beginner guide)
+
+Each `.md` file in this folder becomes one page at `/blogs/<filename-without-md>`.
+
+IMPORTANT: Do NOT name helper docs `*.md` in this folder — only real blog posts
+should use the `.md` extension. This file is `.txt` on purpose so the site
+does not try to turn it into a blog page.
+
+## Required frontmatter
+
+```yaml
+---
+title: 'My Post Title'
+date: 'March 12 2026'
+image: '/imgs/projects/eve/eve-hero.jpg'
+description: 'One or two sentences shown on cards and the listing hero.'
+tags: ['EVE', 'Perception']
+authors: ['WATonomous Autonomy Team']
+spotlight: true
+---
+```
+
+| Field | Notes |
+|-------|--------|
+| `title` | Shown in hero + cards, with the teal `//` accent in the UI |
+| `date` | Prefer `MMMM DD YYYY` (example: `March 12 2026`) |
+| `image` | Path under `public/` (must exist or the hero/card will look broken) |
+| `description` | Short blurb for cards / search |
+| `tags` | Prefer the controlled set used on the site: `EVE`, `Micro`, `Rover`, `Humanoid`, `Competition`, `Team News`, `Perception`, `Planning`, `Sponsors` |
+| `authors` | Always a list, even for one author |
+| `spotlight` | `true` → appears in the Spotlight carousel on `/blogs` |
+
+## After the `---`
+
+Write normal Markdown (headings, lists, links, images).
+
+## Useful URLs
+
+- Listing: `/blogs`
+- Article: `/blogs/eve-urban-autonomy`
+- Layout preview: `/blogs/preview`

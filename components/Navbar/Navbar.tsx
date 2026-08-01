@@ -103,9 +103,15 @@ const Navbar = ({ toggleModal, dark }: NavBarProps) => {
                                 </div>
                             </NavbarItem>
                         </NavbarFolder>
-                        {/* <NavbarItem href={"/blogs"} toggle={closeMobile}>
-                        BLOG
-                    </NavbarItem> */}
+                        {/*
+                         * Workstream A (PRD): Restore discoverability.
+                         * This link was previously commented out, which hid the
+                         * entire blog from primary navigation. Keep it enabled
+                         * so visitors can reach /blogs from desktop and mobile.
+                         */}
+                        <NavbarItem href={"/blogs"} toggle={closeMobile}>
+                            BLOG
+                        </NavbarItem>
                         <NavbarItem href={"/careers"} toggle={closeMobile}>
                             GET INVOLVED
                         </NavbarItem>
