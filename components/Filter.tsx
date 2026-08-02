@@ -33,6 +33,9 @@ interface FilterProps {
     onToggleTag?: (tag: string) => void;
 }
 
+/**
+ * Search box (+ optional tag chips) controlling the "All Blogs" grid filter.
+ */
 const Filter = ({
     placeholder,
     filters,
@@ -43,6 +46,7 @@ const Filter = ({
 }: FilterProps) => {
     const hasTagUi = availableTags.length > 0 && typeof onToggleTag === "function";
 
+    /** Reset text query and deselect every active tag chip. */
     const handleClear = () => {
         setFilters("");
         // Clearing also deselects every tag (parent listens by receiving empty via toggles).
@@ -75,12 +79,12 @@ const Filter = ({
 
             {/*
              * Tag filter chips (Workstream D).
-             * Click a chip to toggle it. Selected chips get a teal outline so
-             * beginners can see which filters are active — using solid brand
-             * tokens only (no new gradients).
+             * Selection ring lives ON the Badge pill (not the button wrapper)
+             * so the outline always matches the chip’s real size — including
+             * when truncation / wrapping changes on mobile vs desktop.
              */}
             {hasTagUi && (
-                <div className="mt-6 flex w-full max-w-[100rem] flex-wrap gap-2 px-4 sm:px-8 md:px-16 lg:w-[90vw] lg:px-0">
+                <div className="mt-6 flex w-full max-w-[100rem] flex-wrap items-center gap-2 px-4 sm:px-8 md:px-16 lg:w-[90vw] lg:px-0">
                     <span className="mr-2 w-full self-center text-xs font-bold uppercase text-wato-teal sm:w-auto">
                         Filter by tag
                     </span>
@@ -91,11 +95,7 @@ const Filter = ({
                                 key={tag}
                                 type="button"
                                 onClick={() => onToggleTag!(tag)}
-                                className={`max-w-full cursor-pointer border-0 bg-transparent p-0 ${
-                                    isSelected
-                                        ? "rounded-lg ring-2 ring-wato-teal"
-                                        : "opacity-80 hover:opacity-100"
-                                }`}
+                                className="inline-flex max-w-full cursor-pointer border-0 bg-transparent p-0"
                                 aria-pressed={isSelected}
                                 title={
                                     isSelected
@@ -103,8 +103,15 @@ const Filter = ({
                                         : `Filter by: ${tag}`
                                 }
                             >
-                                {/* Reuse exact Badge look (existing bg-badge gradient). */}
-                                <Badge content={tag} />
+                                <Badge
+                                    content={tag}
+                                    className={
+                                        isSelected
+                                            ? // mr-0: parent gap-2 handles spacing; ring hugs the pill box
+                                              "mr-0 box-border ring-2 ring-wato-teal ring-offset-0"
+                                            : "mr-0 opacity-80 hover:opacity-100"
+                                    }
+                                />
                             </button>
                         );
                     })}

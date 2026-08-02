@@ -13,12 +13,19 @@ import Link from "next/link";
 import BadgeList from "../Badge/BadgeList";
 import Image from "next/image";
 import { BlogPostData } from "../../types";
+import ReadingTimeLabel from "./ReadingTimeLabel";
 
 interface PostProps {
     data: BlogPostData;
 }
 
+/**
+ * One clickable blog card linking to `/blogs/<id>`.
+ * Layout is mobile-safe (min-w-0, wrap, no absolute tags).
+ */
 const Post = ({ data }: PostProps) => {
+    const minutes = data.readingMinutes ?? 1;
+
     return (
         /*
          * min-w-0 + overflow-hidden: critical in CSS grids on mobile.
@@ -44,6 +51,11 @@ const Post = ({ data }: PostProps) => {
                 <div className="mb-1 break-words text-xl font-medium sm:text-2xl">
                     {data.title}&nbsp;
                     <span className="text-wato-teal">{"//"}</span>
+                </div>
+
+                {/* Reading time directly under the card title */}
+                <div className="mb-2">
+                    <ReadingTimeLabel minutes={minutes} />
                 </div>
 
                 <div className="mb-3 break-words text-sm sm:mb-5 sm:text-base">

@@ -17,6 +17,10 @@ interface BlogPostingsProps {
     postings: BlogPostData[];
 }
 
+/**
+ * Renders a titled section of blog cards in a responsive grid.
+ * Empty `postings` still shows the section title (caller may hide instead).
+ */
 const BlogPostings = ({ title, postings }: BlogPostingsProps) => {
     return (
         <div className="flex w-full flex-col items-center overflow-x-hidden bg-wato-black-vanta py-10 sm:py-16">

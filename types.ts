@@ -52,6 +52,11 @@ export interface BlogPostData {
      * Safe to omit; treat missing as false.
      */
     spotlight?: boolean;
+    /**
+     * Estimated reading time in whole minutes (computed from markdown body).
+     * Shown near titles on cards, hero, and article pages.
+     */
+    readingMinutes?: number;
 }
 
 export interface StaticProps {

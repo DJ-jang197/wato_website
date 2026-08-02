@@ -1,12 +1,8 @@
 /**
- * pages/blogs/preview.tsx — Local visual preview of an article page
- * =================================================================
- * BEGINNER NOTE:
- * This is a FIXED url (`/blogs/preview`) that always loads one real post
- * so you can check the article layout without typing a dynamic id.
- *
- * It intentionally mirrors pages/blogs/[id].tsx (same components / order).
- * Update the hardcoded id below if you rename or remove that markdown file.
+ * pages/blogs/preview.tsx — Fixed preview of one article (no dynamic id)
+ * =====================================================================
+ * Useful for layout QA at /blogs/preview without typing a slug.
+ * Keep PREVIEW_POST_ID in sync with a real file under static/blogs/.
  */
 
 import { getBlogData, getRelatedPosts } from "../../lib/blogsDAL";
@@ -16,7 +12,7 @@ import Detail from "../../components/Detail";
 import BadgeList from "../../components/Badge/BadgeList";
 import { BlogPostData } from "../../types";
 
-/** Which markdown post to preview. Must match a file in static/blogs/. */
+/** Must match an existing `static/blogs/<id>.md` filename. */
 const PREVIEW_POST_ID = "eve-urban-autonomy";
 
 interface BlogPreviewPageProps {
@@ -24,6 +20,9 @@ interface BlogPreviewPageProps {
     relatedPosts: BlogPostData[];
 }
 
+/**
+ * Same visual layout as pages/blogs/[id].tsx for the hardcoded preview post.
+ */
 export default function BlogPreviewPage({
     blogData,
     relatedPosts,
@@ -49,6 +48,9 @@ export default function BlogPreviewPage({
     );
 }
 
+/**
+ * Always loads PREVIEW_POST_ID (no URL params).
+ */
 export async function getStaticProps() {
     const blogData = await getBlogData(PREVIEW_POST_ID);
     const relatedPosts = getRelatedPosts(PREVIEW_POST_ID, 3);

@@ -1,10 +1,12 @@
 # Blog posts (beginner guide)
-
-Each `.md` file in this folder becomes one page at `/blogs/<filename-without-md>`.
-
-IMPORTANT: Do NOT name helper docs `*.md` in this folder — only real blog posts
-should use the `.md` extension. This file is `.txt` on purpose so the site
-does not try to turn it into a blog page.
+# ===========================
+#
+# Each `.md` file here becomes `/blogs/<filename-without-md>`.
+# Do NOT put helper docs as `*.md` in this folder — use `.txt` (like this file)
+# so the site does not try to render them as posts.
+#
+# You can also publish via the Admin portal (navbar → Login) if your
+# @uwaterloo.ca email is allowlisted + email-verified.
 
 ## Required frontmatter
 
@@ -17,18 +19,22 @@ description: 'One or two sentences shown on cards and the listing hero.'
 tags: ['EVE', 'Perception']
 authors: ['WATonomous Autonomy Team']
 spotlight: true
+ownerEmail: 'alice.chen@uwaterloo.ca'
 ---
 ```
 
 | Field | Notes |
 |-------|--------|
-| `title` | Shown in hero + cards, with the teal `//` accent in the UI |
-| `date` | Prefer `MMMM DD YYYY` (example: `March 12 2026`) |
-| `image` | Path under `public/` (must exist or the hero/card will look broken) |
-| `description` | Short blurb for cards / search |
-| `tags` | Prefer the controlled set used on the site: `EVE`, `Micro`, `Rover`, `Humanoid`, `Competition`, `Team News`, `Perception`, `Planning`, `Sponsors` |
-| `authors` | Always a list, even for one author |
-| `spotlight` | `true` → appears in the Spotlight carousel on `/blogs` |
+| `title` | Hero + cards; teal `//` accent in the UI |
+| `date` | Prefer `MMMM DD YYYY` |
+| `image` | Path under `public/` (file must exist) |
+| `description` | Card / search blurb |
+| `tags` | Controlled set preferred: EVE, Micro, Rover, Humanoid, Competition, Team News, Perception, Planning, Sponsors |
+| `authors` | Always a YAML list |
+| `spotlight` | `true` → Spotlight carousel on `/blogs` |
+| `ownerEmail` | Optional; set automatically when publishing via Admin (IDOR ownership) |
+
+Reading time ("N min read") is computed automatically from the markdown body.
 
 ## After the `---`
 
@@ -39,3 +45,4 @@ Write normal Markdown (headings, lists, links, images).
 - Listing: `/blogs`
 - Article: `/blogs/eve-urban-autonomy`
 - Layout preview: `/blogs/preview`
+- Admin login: `/admin/login`

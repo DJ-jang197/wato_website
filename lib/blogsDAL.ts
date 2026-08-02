@@ -40,6 +40,7 @@ import { remark } from "remark";
 import html from "remark-html";
 import { BlogPostData } from "../types";
 import { pickRelatedPosts } from "./blogRelated";
+import { estimateReadingMinutes } from "./readingTime";
 
 /**
  * Shape returned by getBlogs().
@@ -91,7 +92,9 @@ const sortByDate = (a: BlogPostData, b: BlogPostData) => {
 const normalizePostFields = (
     id: string,
     data: Record<string, unknown>,
-    contentHtml: string
+    contentHtml: string,
+    /** Raw markdown body (after frontmatter) — used for reading-time estimate. */
+    markdownBody = ""
 ): BlogPostData | null => {
     // No title → not a real post (likely a leftover doc). Skip it.
     if (typeof data.title !== "string" || !data.title.trim()) {
@@ -115,6 +118,8 @@ const normalizePostFields = (
         image: typeof data.image === "string" ? data.image : "",
         contentHtml,
         spotlight: Boolean(data.spotlight),
+        // Always compute from body so cards + articles stay consistent.
+        readingMinutes: estimateReadingMinutes(markdownBody),
     };
 };
 
@@ -131,7 +136,12 @@ const readBlogMeta = (filename: string): BlogPostData | null => {
     const content = fs.readFileSync(filePath, "utf8");
     const parsedContent = matter(content);
 
-    return normalizePostFields(id, parsedContent.data, "");
+    return normalizePostFields(
+        id,
+        parsedContent.data,
+        "",
+        parsedContent.content
+    );
 };
 
 /**
@@ -192,10 +202,37 @@ export const getBlogIds = () => {
 };
 
 /**
+ * Resolve a post id to a safe absolute path under static/blogs/.
+ * Rejects path traversal (`../`, absolute paths, weird separators).
+ */
+const resolveBlogPath = (id: string): string | null => {
+    const safe = String(id || "").trim();
+    if (
+        !safe ||
+        safe.includes("..") ||
+        safe.includes("/") ||
+        safe.includes("\\") ||
+        safe.includes("\0")
+    ) {
+        return null;
+    }
+    const root = path.resolve(PATH);
+    const filePath = path.resolve(PATH, `${safe}.md`);
+    const relative = path.relative(root, filePath);
+    if (relative.startsWith("..") || path.isAbsolute(relative)) {
+        return null;
+    }
+    return filePath;
+};
+
+/**
  * Load ONE full blog post (metadata + HTML body) for the article page.
  */
 export const getBlogData = async (id: string): Promise<BlogPostData> => {
-    const filePath = path.join(PATH, `${id}.md`);
+    const filePath = resolveBlogPath(id);
+    if (!filePath || !fs.existsSync(filePath)) {
+        throw new Error(`Blog post "${id}" was not found.`);
+    }
     const fileContents = fs.readFileSync(filePath, "utf8");
     const parsedContent = matter(fileContents);
 
@@ -205,7 +242,8 @@ export const getBlogData = async (id: string): Promise<BlogPostData> => {
     const post = normalizePostFields(
         id,
         parsedContent.data,
-        contentHtml.toString()
+        contentHtml.toString(),
+        parsedContent.content
     );
 
     if (!post) {

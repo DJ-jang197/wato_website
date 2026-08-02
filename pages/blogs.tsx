@@ -2,17 +2,14 @@
  * pages/blogs.tsx — Blog listing page (`/blogs`)
  * ==============================================
  * BEGINNER NOTE:
- * This is the page you see at http://localhost:3000/blogs
+ * This is the page at http://localhost:3000/blogs
  *
- * Vertical layout (PRD hierarchy, with Spotlight added in Workstream C):
- *   1. Hero          → newest post (full-screen)
- *   2. Spotlight     → carousel of posts with spotlight: true
- *   3. Featured      → newest 3 posts as cards
+ * Layout (top → bottom):
+ *   1. Hero          → newest post
+ *   2. Spotlight     → posts with spotlight: true
+ *   3. Featured      → newest 3 cards
  *   4. Filter        → text search + tag chips
- *   5. All Blogs     → full grid (filtered)
- *
- * Data comes from getStaticProps → lib/blogsDAL.getBlogs() at BUILD time
- * (and on each request in `next dev`).
+ *   5. All Blogs     → filtered grid
  */
 
 import { getBlogs } from "../lib/blogsDAL";
@@ -33,13 +30,15 @@ interface BlogPageProps {
     allBlogsData: BlogDataList;
 }
 
+/**
+ * Client component for the public blog index.
+ * Search + tag filters run entirely in the browser (no extra API calls).
+ */
 const Blogs = ({ allBlogsData }: BlogPageProps) => {
-    // Free-text search string (Workstream D keeps this behaviour unchanged).
     const [filters, setFilters] = useState("");
-    // Selected tag chips — a post must include ALL selected tags to match.
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-    /** Toggle a tag in/out of the selectedTags array. */
+    /** Toggle a tag chip on/off in the selectedTags list. */
     const toggleTag = (tag: string) => {
         setSelectedTags((prev) =>
             prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -47,9 +46,8 @@ const Blogs = ({ allBlogsData }: BlogPageProps) => {
     };
 
     /**
-     * Combined filter for the "All Blogs" grid:
-     *   1. Text search across title / authors / date / description / tags
-     *   2. AND every selected tag must be on the post
+     * Returns true when a post matches the current text query AND all
+     * selected tags. Empty filters mean "match everything".
      */
     const blogFilter = (post: BlogPostData) => {
         const textMatch = `${post.title} ${post.authors.join(" ")} ${post.date
@@ -64,40 +62,43 @@ const Blogs = ({ allBlogsData }: BlogPageProps) => {
         return textMatch && tagsMatch;
     };
 
+    const posts = allBlogsData.all || [];
+    const newest = posts[0];
+
     return (
         <div className="bg-wato-black-vanta">
-            {/* Hero uses the newest post (index 0 after date sort). */}
-            <HeroBlog blog={allBlogsData.all[0]} content />
+            {newest ? <HeroBlog blog={newest} content /> : null}
 
-            {/*
-             * Workstream C — Spotlight carousel.
-             * Judgment call: placed after hero and before Featured so the
-             * original Featured / Filter / All hierarchy stays intact below.
-             */}
             <Spotlight
-                postings={allBlogsData.spotlight}
-                allPosts={allBlogsData.all}
+                postings={allBlogsData.spotlight || []}
+                allPosts={posts}
             />
 
-            <BlogPostings title={"Featured"} postings={allBlogsData.featured} />
+            <BlogPostings
+                title={"Featured"}
+                postings={allBlogsData.featured || []}
+            />
 
             <Filter
                 placeholder={"Search for a title, description, tag or author"}
                 filters={filters}
                 setFilters={setFilters}
-                availableTags={allBlogsData.tags}
+                availableTags={allBlogsData.tags || []}
                 selectedTags={selectedTags}
                 onToggleTag={toggleTag}
             />
 
             <BlogPostings
                 title={"All Blogs"}
-                postings={allBlogsData.all.filter(blogFilter)}
+                postings={posts.filter(blogFilter)}
             />
         </div>
     );
 };
 
+/**
+ * Load all blog metadata at build time (and on each request in `next dev`).
+ */
 export async function getStaticProps() {
     const allBlogsData = getBlogs();
     return {
