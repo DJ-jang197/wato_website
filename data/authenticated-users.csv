@@ -1,0 +1,6 @@
+email,name,role,active,email_verified
+alice.chen@uwaterloo.ca,Alice Chen,admin,true,true
+bob.nguyen@uwaterloo.ca,Bob Nguyen,author,true,true
+carol.patel@uwaterloo.ca,Carol Patel,author,true,false
+diego.martinez@uwaterloo.ca,Diego Martinez,author,true,true
+emma.wilson@uwaterloo.ca,Emma Wilson,admin,true,true

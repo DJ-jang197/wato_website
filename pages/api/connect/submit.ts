@@ -2,13 +2,19 @@ import busboy from "busboy";
 import { NextApiRequest, NextApiResponse } from "next";
 import * as postmark from "postmark";
 import { checkLimit } from "../../../lib/ratelimiter";
+import { securityLog } from "../../../lib/admin/securityLog";
 
 const submit = async (req: NextApiRequest, res: NextApiResponse) => {
     const ip =
         ((req.headers["x-forwarded-for"] as string) || "").split(" ")[0] ??
         req.headers["x-real-ip"];
 
-    if (await checkLimit(ip)) {
+    if (await checkLimit(typeof ip === "string" ? ip : undefined)) {
+        securityLog("rate_limited", {
+            bucket: "public_api",
+            ip: String(ip || ""),
+            path: "/api/connect/submit",
+        });
         return res.status(429).json({ res: "You are being rate limited." });
     }
 

@@ -33,3 +33,11 @@ yarn-error.log*
 # vercel
 .vercel
 wato-service-secret.json
+
+# admin auth hardening
+data/admin-audit.jsonl
+data/security.log
+data/auth-tokens.json
+data/user-password-hashes.json
+.env
+.env*.local
