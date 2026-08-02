@@ -2,14 +2,12 @@
  * Spotlight.tsx — Blog Spotlight carousel (Workstream C)
  * ======================================================
  * BEGINNER NOTE:
- * This section sits on the /blogs listing page and auto-rotates through posts
- * whose markdown frontmatter has `spotlight: true`.
+ * This section sits on the /blogs listing page under the Featured hero.
  *
- * What it shows for the "current" spotlight post:
- *   - A marquee of neighbouring titles (prev / current / next)
- *   - Title + description
- *   - Up to 2 "Related" mini-cards (real posts, shared-tag logic)
- *   - A large image (desktop)
+ * How navigation works:
+ *   - Auto-advances every 50 seconds through posts with `spotlight: true`
+ *   - Left / right arrows manually step prev / next (resets the auto timer)
+ *   - Clicking a marquee title opens that blog article
  *
  * Design constraints (PRD §4 / §4.1):
  *   - Keep existing wato-blue.gloomy / wato-blue.water colours
@@ -21,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { BlogPostData, Fade, MarqueeDirection } from "../../types";
 import { fadeElement } from "../../lib/utils";
 import { pickRelatedPosts } from "../../lib/blogRelated";
@@ -72,10 +71,21 @@ interface MarqueeProps {
     /** Optional second row used by the animation mask (same structure as original). */
     maskPosts?: BlogPostData[];
     onItemClick(postId: string): void;
+    onPrev(): void;
+    onNext(): void;
 }
 
-/** Horizontal prev / current / next title strip above the spotlight body. */
-const Marquee = ({ posts, maskPosts, onItemClick }: MarqueeProps) => {
+/**
+ * Horizontal prev / current / next title strip with side arrows.
+ * The blue underline + fade mask stays; arrows step the carousel.
+ */
+const Marquee = ({
+    posts,
+    maskPosts,
+    onItemClick,
+    onPrev,
+    onNext,
+}: MarqueeProps) => {
     /** Forward marquee clicks to the parent (navigate to that post). */
     const handleClick = (_idx: number, postId: string) => {
         onItemClick(postId);
@@ -95,8 +105,16 @@ const Marquee = ({ posts, maskPosts, onItemClick }: MarqueeProps) => {
         ));
 
     return (
-        <div className="mb-12 flex justify-center border-b-2 border-wato-blue">
-            <div className="spotlight-container min-h-[5em] overflow-hidden">
+        <div className="mb-12 flex w-full items-center justify-center gap-1 border-b-2 border-wato-blue sm:gap-3">
+            <button
+                type="button"
+                aria-label="Previous spotlight post"
+                onClick={onPrev}
+                className="shrink-0 rounded-full p-2 text-wato-blue transition-opacity hover:opacity-80"
+            >
+                <FaChevronLeft className="text-xl sm:text-2xl" />
+            </button>
+            <div className="spotlight-container min-h-[5em] min-w-0 flex-1 overflow-hidden">
                 <div className="spotlight-mask absolute z-20 flex bg-wato-blue-gloomy opacity-0">
                     {renderItems(maskPosts ?? posts)}
                 </div>
@@ -104,6 +122,14 @@ const Marquee = ({ posts, maskPosts, onItemClick }: MarqueeProps) => {
                     {renderItems(posts)}
                 </div>
             </div>
+            <button
+                type="button"
+                aria-label="Next spotlight post"
+                onClick={onNext}
+                className="shrink-0 rounded-full p-2 text-wato-blue transition-opacity hover:opacity-80"
+            >
+                <FaChevronRight className="text-xl sm:text-2xl" />
+            </button>
         </div>
     );
 };
@@ -124,24 +150,10 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
     const [currentIdx, setCurrentIdx] = useState(0);
     const [fastIdx, setFastIdx] = useState(0);
     const timer = useRef<ReturnType<typeof setInterval>>();
+    const transitioning = useRef(false);
 
     const hasPosts = postings && postings.length > 0;
     const len = hasPosts ? postings.length : 1;
-
-    /** Advance the carousel one step (used by the auto-rotation timer). */
-    const getNext = () =>
-        transitionSpotlight(
-            MarqueeDirection.Next,
-            () => setFastIdx((idx) => idx + 1),
-            () => setCurrentIdx((idx) => idx + 1)
-        );
-
-    // Hooks must run every render (even when postings is empty).
-    useEffect(() => {
-        if (!hasPosts) return;
-        timer.current = setInterval(getNext, SPOTLIGHT_ROTATION_INTERVAL);
-        return () => clearInterval(timer.current);
-    }, [hasPosts, len]);
 
     /** Small Promise-based delay used by the transition animation. */
     const delay = (d: number) => {
@@ -157,6 +169,9 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
         fastFn: () => void,
         fn: () => void
     ) => {
+        if (transitioning.current) return;
+        transitioning.current = true;
+
         const elements = document.querySelectorAll(`.spotlight`);
         const list = document.querySelector(`.spotlight-list`);
         const listMask = document.querySelector(`.spotlight-mask`);
@@ -164,39 +179,68 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
         clearInterval(timer.current);
         timer.current = setInterval(getNext, SPOTLIGHT_ROTATION_INTERVAL);
 
-        fastFn();
-        fadeElement(Fade.Out, elements);
+        try {
+            fastFn();
+            fadeElement(Fade.Out, elements);
 
-        list!.classList.add(
-            direction === MarqueeDirection.Next
-                ? "-translate-x-[271.6px]"
-                : "translate-x-[271.6px]"
-        );
+            list!.classList.add(
+                direction === MarqueeDirection.Next
+                    ? "-translate-x-[271.6px]"
+                    : "translate-x-[271.6px]"
+            );
 
-        await delay(100);
-        listMask!.classList.remove("opacity-0");
-        await delay(300);
+            await delay(100);
+            listMask!.classList.remove("opacity-0");
+            await delay(300);
 
-        list!.classList.remove(
-            direction === MarqueeDirection.Next
-                ? "-translate-x-[271.6px]"
-                : "translate-x-[271.6px]"
-        );
-        list!.classList.remove("transition-all");
+            list!.classList.remove(
+                direction === MarqueeDirection.Next
+                    ? "-translate-x-[271.6px]"
+                    : "translate-x-[271.6px]"
+            );
+            list!.classList.remove("transition-all");
 
-        fn();
-        await delay(100);
+            fn();
+            await delay(100);
 
-        listMask!.classList.add("opacity-0");
-        fadeElement(Fade.In, elements);
-        list!.classList.add("transition-all");
+            listMask!.classList.add("opacity-0");
+            fadeElement(Fade.In, elements);
+            list!.classList.add("transition-all");
+        } finally {
+            transitioning.current = false;
+        }
     };
+
+    /** Advance the carousel one step (auto-rotation + next arrow). */
+    const getNext = () =>
+        transitionSpotlight(
+            MarqueeDirection.Next,
+            () => setFastIdx((idx) => idx + 1),
+            () => setCurrentIdx((idx) => idx + 1)
+        );
+
+    /** Step the carousel backward (previous arrow). */
+    const getPrev = () =>
+        transitionSpotlight(
+            MarqueeDirection.Previous,
+            () => setFastIdx((idx) => idx - 1),
+            () => setCurrentIdx((idx) => idx - 1)
+        );
+
+    // Hooks must run every render (even when postings is empty).
+    useEffect(() => {
+        if (!hasPosts) return;
+        timer.current = setInterval(getNext, SPOTLIGHT_ROTATION_INTERVAL);
+        return () => clearInterval(timer.current);
+    }, [hasPosts, len]);
 
     if (!hasPosts) {
         return null;
     }
 
-    const post = postings.at(currentIdx % postings.length)!;
+    const post = postings.at(
+        ((currentIdx % postings.length) + postings.length) % postings.length
+    )!;
     const related = pickRelatedPosts(post, allPosts, RELATED_CARD_COUNT);
 
     /** Client-side navigation when a marquee title or related card is chosen. */
@@ -204,16 +248,19 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
         router.push(`/blogs/${postId}`);
     };
 
+    const safeIdx = (idx: number) =>
+        ((idx % postings.length) + postings.length) % postings.length;
+
     const marqueePostings = [
-        postings.at((currentIdx - 1 + postings.length) % postings.length)!,
-        postings.at(currentIdx % postings.length)!,
-        postings.at((currentIdx + 1) % postings.length)!,
+        postings.at(safeIdx(currentIdx - 1))!,
+        postings.at(safeIdx(currentIdx))!,
+        postings.at(safeIdx(currentIdx + 1))!,
     ];
 
     const fastPostings = [
-        postings.at((fastIdx - 1 + postings.length) % postings.length)!,
-        postings.at(fastIdx % postings.length)!,
-        postings.at((fastIdx + 1) % postings.length)!,
+        postings.at(safeIdx(fastIdx - 1))!,
+        postings.at(safeIdx(fastIdx))!,
+        postings.at(safeIdx(fastIdx + 1))!,
     ];
 
     return (
@@ -224,9 +271,10 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
                 posts={marqueePostings}
                 maskPosts={fastPostings}
                 onItemClick={navigateToPost}
+                onPrev={getPrev}
+                onNext={getNext}
             />
             <div className="spotlight grid w-full min-w-0 auto-rows-min gap-x-24 gap-y-8 transition-opacity sm:gap-y-12 lg:grid-cols-2">
-                {/* Title scales down on phones so it stays inside the section */}
                 <div className="col-start-1 col-end-2 min-w-0">
                     <div className="break-words text-3xl font-medium sm:text-5xl lg:text-6xl">
                         {post.title}
@@ -242,11 +290,6 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
                 </div>
                 <div className="col-start-1 col-end-2 min-w-0">
                     <span className="text-lg font-bold sm:text-xl">Related</span>
-                    {/*
-                     * Stack related mini-cards on mobile (flex-col),
-                     * side-by-side on larger screens. min-w-0 + break-words
-                     * keep long titles inside each card.
-                     */}
                     <div className="mt-2 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
                         {related.map((relatedPost) => (
                             <Link
