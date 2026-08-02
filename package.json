@@ -14,6 +14,7 @@
         "@types/busboy": "^1.5.0",
         "@types/nodemailer": "^6.4.10",
         "@upstash/ratelimit": "^2.0.5",
+        "bcryptjs": "^3.0.3",
         "busboy": "^1.6.0",
         "cross-env": "^7.0.3",
         "fs": "^0.0.1-security",
@@ -22,6 +23,7 @@
         "lucide-react": "^0.545.0",
         "marked": "^4.2.12",
         "next": "^13.3.0",
+        "next-auth": "^4.24.15",
         "nodemailer": "^6.9.1",
         "path": "^0.12.7",
         "postmark": "^4.0.5",
@@ -36,6 +38,7 @@
         "sharp": "^0.33.5"
     },
     "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
         "@types/locomotive-scroll": "^4.1.0",
         "@types/node": "^18.17.1",
         "@types/react": "18.2.21",

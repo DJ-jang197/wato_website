@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { NextApiRequest, NextApiResponse } from "next";
 import { checkLimit } from "../../../lib/ratelimiter";
+import { securityLog } from "../../../lib/admin/securityLog";
 
 const auth = new google.auth.GoogleAuth({
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
@@ -26,7 +27,12 @@ const apply = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const body = JSON.parse(req.body);
 
-        if (await checkLimit(ip)) {
+        if (await checkLimit(typeof ip === "string" ? ip : undefined)) {
+            securityLog("rate_limited", {
+                bucket: "public_api",
+                ip: String(ip || ""),
+                path: "/api/jobpostings/apply",
+            });
             return res.status(429).json({ res: "You are being rate limited." });
         }
 
@@ -69,6 +75,10 @@ const apply = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(200).json({ res: "Application successful!" });
     } catch (e) {
         console.error(e);
+        securityLog("api_error", {
+            path: "/api/jobpostings/apply",
+            error: "apply_failed",
+        });
         res.status(500).json({
             res: "Application unsuccessful, please try again.",
         });

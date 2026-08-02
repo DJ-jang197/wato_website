@@ -39,6 +39,7 @@ interface MarqueeItemProps {
     onClick(idx: number, postId: string): void;
 }
 
+/** One title cell in the spotlight marquee (clickable / keyboard accessible). */
 const MarqueeItem = ({
     idx,
     isCurrent,
@@ -73,11 +74,14 @@ interface MarqueeProps {
     onItemClick(postId: string): void;
 }
 
+/** Horizontal prev / current / next title strip above the spotlight body. */
 const Marquee = ({ posts, maskPosts, onItemClick }: MarqueeProps) => {
+    /** Forward marquee clicks to the parent (navigate to that post). */
     const handleClick = (_idx: number, postId: string) => {
         onItemClick(postId);
     };
 
+    /** Map posts into MarqueeItem elements for the visible or mask row. */
     const renderItems = (list: BlogPostData[]) =>
         list.map((post, index) => (
             <MarqueeItem
@@ -111,6 +115,10 @@ interface SpotlightProps {
     allPosts: BlogPostData[];
 }
 
+/**
+ * Auto-rotating spotlight section for posts marked `spotlight: true`.
+ * Returns null when there are no spotlight posts.
+ */
 const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
     const router = useRouter();
     const [currentIdx, setCurrentIdx] = useState(0);
@@ -120,6 +128,7 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
     const hasPosts = postings && postings.length > 0;
     const len = hasPosts ? postings.length : 1;
 
+    /** Advance the carousel one step (used by the auto-rotation timer). */
     const getNext = () =>
         transitionSpotlight(
             MarqueeDirection.Next,
@@ -134,10 +143,15 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
         return () => clearInterval(timer.current);
     }, [hasPosts, len]);
 
+    /** Small Promise-based delay used by the transition animation. */
     const delay = (d: number) => {
         return new Promise((resolve) => setTimeout(resolve, d));
     };
 
+    /**
+     * Animate marquee slide + fade, then commit the index update.
+     * Resets the auto-rotation timer after each transition.
+     */
     const transitionSpotlight = async (
         direction: MarqueeDirection,
         fastFn: () => void,
@@ -185,6 +199,7 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
     const post = postings.at(currentIdx % postings.length)!;
     const related = pickRelatedPosts(post, allPosts, RELATED_CARD_COUNT);
 
+    /** Client-side navigation when a marquee title or related card is chosen. */
     const navigateToPost = (postId: string) => {
         router.push(`/blogs/${postId}`);
     };
@@ -212,8 +227,15 @@ const Spotlight = ({ postings, allPosts }: SpotlightProps) => {
             />
             <div className="spotlight grid w-full min-w-0 auto-rows-min gap-x-24 gap-y-8 transition-opacity sm:gap-y-12 lg:grid-cols-2">
                 {/* Title scales down on phones so it stays inside the section */}
-                <div className="col-start-1 col-end-2 break-words text-3xl font-medium sm:text-5xl lg:text-6xl">
-                    {post.title}
+                <div className="col-start-1 col-end-2 min-w-0">
+                    <div className="break-words text-3xl font-medium sm:text-5xl lg:text-6xl">
+                        {post.title}
+                    </div>
+                    {typeof post.readingMinutes === "number" && (
+                        <div className="mt-2 text-sm font-medium text-wato-blue">
+                            {post.readingMinutes} min read
+                        </div>
+                    )}
                 </div>
                 <div className="col-start-1 col-end-2 break-words text-base font-light sm:text-xl">
                     {post.description}

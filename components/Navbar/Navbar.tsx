@@ -10,6 +10,7 @@ import WatoLogo from "../../public/imgs/watonomous.png";
 import NavbarFolder from "./NavbarFolder";
 
 import { Car, Zap, Orbit, Bot, BookOpen, CloudLightning, ChevronDown } from "lucide-react";
+import NavbarAuth from "./NavbarAuth";
 interface NavBarProps {
     toggleModal(): any;
     dark?: boolean;
@@ -172,6 +173,8 @@ const Navbar = ({ toggleModal, dark }: NavBarProps) => {
                         <NavbarActionItem actions={[toggleModal, closeMobile]}>
                             CONNECT
                         </NavbarActionItem>
+                        {/* Top-right auth entry (PRD admin portal) */}
+                        <NavbarAuth toggle={closeMobile} />
                     </ul>
                 </div>
             </div>

@@ -33,6 +33,9 @@ interface FilterProps {
     onToggleTag?: (tag: string) => void;
 }
 
+/**
+ * Search box (+ optional tag chips) controlling the "All Blogs" grid filter.
+ */
 const Filter = ({
     placeholder,
     filters,
@@ -43,6 +46,7 @@ const Filter = ({
 }: FilterProps) => {
     const hasTagUi = availableTags.length > 0 && typeof onToggleTag === "function";
 
+    /** Reset text query and deselect every active tag chip. */
     const handleClear = () => {
         setFilters("");
         // Clearing also deselects every tag (parent listens by receiving empty via toggles).

@@ -15,6 +15,7 @@ interface BadgeListProps {
     badges: string[];
 }
 
+/** Renders a wrapping list of Badge pills for post tags. */
 const BadgeList = ({ badges }: BadgeListProps) => {
     return (
         <div className="flex max-w-full min-w-0 flex-wrap gap-y-2 overflow-hidden">

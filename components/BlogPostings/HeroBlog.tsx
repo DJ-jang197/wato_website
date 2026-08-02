@@ -1,13 +1,27 @@
+/**
+ * HeroBlog.tsx — Full-bleed blog hero (listing newest post or article title)
+ * ========================================================================
+ * `content=true` (listing): authors, description, tags, Read More CTA.
+ * `content=false` (article): title + reading time only.
+ */
+
 import { BlogPostData } from "../../types";
 import BadgeList from "../Badge/BadgeList";
 import { FaArrowAltCircleRight } from "react-icons/fa";
+import ReadingTimeLabel from "./ReadingTimeLabel";
 
 interface HeroBlogProps {
     blog: BlogPostData;
+    /** When true, show blurb + tags + Read More (listing page). */
     content: boolean;
 }
 
+/**
+ * Edge-to-edge hero using the post image as a background plane.
+ */
 const HeroBlog = ({ blog, content }: HeroBlogProps) => {
+    const minutes = blog.readingMinutes ?? 1;
+
     return (
         <div
             style={{ backgroundImage: `url(${blog.image})` }}
@@ -15,9 +29,13 @@ const HeroBlog = ({ blog, content }: HeroBlogProps) => {
         >
             <div className="flex h-screen w-full items-end justify-center bg-black bg-opacity-90 lg:bg-opacity-80">
                 <div className="mx-auto my-20 w-full max-w-[100rem] px-4 text-white sm:my-32 sm:px-8 md:px-16 lg:w-[90vw] lg:px-0">
-                    <div className="mb-6 break-words text-2xl font-black sm:mb-8 lg:text-5xl">
+                    <div className="mb-2 break-words text-2xl font-black sm:mb-3 lg:text-5xl">
                         {blog.title}&nbsp;
                         <span className="text-wato-teal">{"//"}</span>
+                    </div>
+                    {/* Reading time sits directly under the title (all hero modes). */}
+                    <div className="mb-6 sm:mb-8">
+                        <ReadingTimeLabel minutes={minutes} />
                     </div>
                     {content && (
                         <>

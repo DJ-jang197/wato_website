@@ -2,14 +2,17 @@ import "../styles/globals.css";
 import Layout from "../components/Layout";
 import { AppProps } from "next/app";
 import { ModalProvider } from "../lib/ModalContext";
+import { SessionProvider } from "next-auth/react";
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     return (
-        <ModalProvider>
-            <Layout>
-                <Component {...pageProps} />
-            </Layout>
-        </ModalProvider>
+        <SessionProvider session={session}>
+            <ModalProvider>
+                <Layout>
+                    <Component {...pageProps} />
+                </Layout>
+            </ModalProvider>
+        </SessionProvider>
     );
 }
 

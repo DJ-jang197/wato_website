@@ -14,6 +14,7 @@
 
 import { BlogPostData } from "../types";
 
+/** Newer posts first (used for related-post ranking ties and fallback). */
 const sortByDate = (a: BlogPostData, b: BlogPostData) => {
     return Date.parse(String(b.date)) - Date.parse(String(a.date));
 };

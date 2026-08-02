@@ -1,18 +1,12 @@
 /**
- * pages/blogs/[id].tsx — Individual blog article (`/blogs/some-post-id`)
- * =====================================================================
+ * pages/blogs/[id].tsx — Individual blog article (`/blogs/<slug>`)
+ * ================================================================
  * BEGINNER NOTE:
- * The square brackets in the filename mean this is a DYNAMIC route.
- * Whatever is in the URL after /blogs/ becomes `params.id`.
- * Example: /blogs/eve-urban-autonomy → params.id === "eve-urban-autonomy"
- *          which loads static/blogs/eve-urban-autonomy.md
+ * Square brackets mean a DYNAMIC route. The URL segment after /blogs/
+ * becomes `params.id` and maps to `static/blogs/<id>.md`.
  *
- * Page layout (PRD hierarchy + Workstream E):
- *   1. Hero (title only)
- *   2. Published / Written by metadata rows
- *   3. Article HTML body
- *   4. Tags
- *   5. Related posts (up to 3 Post cards)
+ * Page order:
+ *   Hero → published/written-by → article HTML → tags → related posts
  */
 
 import { getBlogData, getBlogIds, getRelatedPosts } from "../../lib/blogsDAL";
@@ -24,14 +18,18 @@ import { BlogPostData, StaticProps } from "../../types";
 
 interface BlogPageProps {
     blogData: BlogPostData;
-    /** Workstream E — related posts for the bottom section. */
+    /** Up to 3 related posts (shared tags, else newest). */
     relatedPosts: BlogPostData[];
 }
 
+/**
+ * Renders one article page. `blogData` and `relatedPosts` come from
+ * getStaticProps at build time (SSG).
+ */
 export default function BlogPage({ blogData, relatedPosts }: BlogPageProps) {
     return (
         <div className="overflow-x-hidden scroll-smooth">
-            {/* content={false} → hero shows title + image only (no Read More CTA). */}
+            {/* content={false}: title + reading time only (no Read More CTA). */}
             <HeroBlog blog={blogData} content={false} />
 
             <Detail title="published">{blogData.date}</Detail>
@@ -48,10 +46,6 @@ export default function BlogPage({ blogData, relatedPosts }: BlogPageProps) {
                 <BadgeList badges={blogData.tags} />
             </Detail>
 
-            {/*
-             * Workstream E — Related posts.
-             * Reuses BlogPostings + Post cards so visuals match the listing page.
-             */}
             {relatedPosts.length > 0 && (
                 <BlogPostings title={"Related Posts"} postings={relatedPosts} />
             )}
@@ -60,20 +54,19 @@ export default function BlogPage({ blogData, relatedPosts }: BlogPageProps) {
 }
 
 /**
- * Tell Next.js which blog URLs to pre-build.
- * One path per markdown file in static/blogs/.
+ * Pre-build one HTML page per markdown file in static/blogs/.
+ * fallback:false → unknown ids show the site 404 page.
  */
 export async function getStaticPaths() {
     const paths = getBlogIds();
     return {
         paths,
-        // fallback: false → unknown ids show the 404 page
         fallback: false,
     };
 }
 
 /**
- * Load the article + related posts for one id at build time.
+ * Load article HTML + related posts for a single id.
  */
 export async function getStaticProps({ params }: StaticProps) {
     const blogData = await getBlogData(params.id);
